@@ -1,0 +1,172 @@
+import time
+import random
+import statistics
+import math
+import matplotlib.pyplot as plt
+
+def calculate_simple_interest(principal, rate, time):
+    return (principal * rate * time) / 100
+
+def calculate_compound_interest(principal, rate, times_compounded, years):
+    return principal * (1 + rate / times_compounded) ** (times_compounded * years)
+
+def calculate_tax(income, province):
+    federal_tax = 0
+    provincial_tax = 0
+
+    if income <= 53359:
+        federal_tax = income * 0.15
+    elif income <= 106717:
+        federal_tax = 53359 * 0.15 + (income - 53359) * 0.205
+    elif income <= 165430:
+        federal_tax = 53359 * 0.15 + (106717 - 53359) * 0.205 + (income - 106717) * 0.26
+    else:
+        federal_tax = 53359 * 0.15 + (106717 - 53359) * 0.205 + (165430 - 106717) * 0.26 + (income - 165430) * 0.29
+
+    province = province.lower().strip()
+
+    if province == 'ontario':
+        if income <= 47630:
+            provincial_tax = income * 0.0505
+        elif income <= 95259:
+            provincial_tax = 47630 * 0.0505 + (income - 47630) * 0.0915
+        elif income <= 150000:
+            provincial_tax = 47630 * 0.0505 + (95259 - 47630) * 0.0915 + (income - 95259) * 0.1116
+        else:
+            provincial_tax = 47630 * 0.0505 + (95259 - 47630) * 0.0915 + (150000 - 95259) * 0.1116 + (income - 150000) * 0.1216
+    elif province == 'british columbia':
+        if income <= 43070:
+            provincial_tax = income * 0.0506
+        elif income <= 86141:
+            provincial_tax = 43070 * 0.0506 + (income - 43070) * 0.077
+        elif income <= 98901:
+            provincial_tax = 43070 * 0.0506 + (86141 - 43070) * 0.077 + (income - 86141) * 0.105
+        else:
+            provincial_tax = 43070 * 0.0506 + (86141 - 43070) * 0.077 + (98901 - 86141) * 0.105 + (income - 98901) * 0.1229
+    elif province == 'quebec':
+        if income <= 46295:
+            provincial_tax = income * 0.15
+        elif income <= 92580:
+            provincial_tax = 46295 * 0.15 + (income - 46295) * 0.20
+        elif income <= 112655:
+            provincial_tax = 46295 * 0.15 + (92580 - 46295) * 0.20 + (income - 92580) * 0.24
+        else:
+            provincial_tax = 46295 * 0.15 + (92580 - 46295) * 0.20 + (112655 - 92580) * 0.24 + (income - 112655) * 0.2575
+    else:
+        return "Invalid province selected"
+
+    return federal_tax + provincial_tax
+
+def calculate_appreciation_or_depreciation(initial_value, rate, years, is_appreciation):
+    if is_appreciation:
+        return initial_value * (1 + rate) ** years
+    else:
+        return initial_value * (1 - rate) ** years
+
+def calculate_monthly_payment(loan_amount, annual_interest_rate, years):
+    monthly_interest_rate = annual_interest_rate / 100 / 12
+    months = years * 12
+    if monthly_interest_rate == 0:
+        return loan_amount / months
+    return loan_amount * (monthly_interest_rate * (1 + monthly_interest_rate) ** months) / ((1 + monthly_interest_rate) ** months - 1)
+
+while True:
+    print("1. Interest")
+    print("2. Tax")
+    print("3. Appreciation & Depreciation ")
+    print("4. Moving Average")
+    print("5. Mortgage")
+    print("6. Exit")
+    choice = input("Enter choice (1/2/3/4/5/6): ")
+
+    if choice == '1':
+        print('1. Simple Interest')
+        print('2. Compound Interest')
+        choice1 = input("Enter choice (1/2): ")
+
+        if choice1 == '1':
+            try:
+                principal = float(input("Enter the principal amount: "))
+                rate = float(input("Enter the annual interest rate (in %): "))
+                time_period = float(input("Enter the time period (in years): "))
+                interest = calculate_simple_interest(principal, rate, time_period)
+                print(f"The Interest is: {interest}")
+            except ValueError:
+                print("Invalid input. Please enter numbers only.")
+
+        elif choice1 == '2':
+            try:
+                principal = float(input("Enter the principal amount (initial investment): "))
+                rate = float(input("Enter the annual interest rate (as a percentage): ")) / 100
+                times_compounded = int(input("Enter the number of times the interest is compounded per year: "))
+                years = int(input("Enter the number of years the money is invested or borrowed for: "))
+                final_amount = calculate_compound_interest(principal, rate, times_compounded, years)
+                print(f"The amount after {years} years will be: ${final_amount:.2f}")
+            except ValueError:
+                print("Invalid input. Please enter valid numbers.")
+        time.sleep(3)
+
+    elif choice == '2':
+        province = input("Enter your province (Ontario, British Columbia, Quebec): ")
+        try:
+            income = float(input(f"Enter your annual income in {province}: "))
+            tax_due = calculate_tax(income, province)
+            if isinstance(tax_due, str):
+                print(tax_due)
+            else:
+                print(f"The total tax due for an income of ${income} in {province.title()} is: ${tax_due:.2f}")
+        except ValueError:
+            print("Invalid income. Please enter a numeric value.")
+        time.sleep(2)
+
+    elif choice == '3':
+        try:
+            initial_value = float(input("Enter the initial value: "))
+            rate = float(input("Enter the annual rate (as a decimal): "))
+            years = int(input("Enter the number of years: "))
+            is_appreciation = input("Is it appreciation (yes or no)? ").lower() == "yes"
+            final_value = calculate_appreciation_or_depreciation(initial_value, rate, years, is_appreciation)
+            print(f"The final value after {years} years is: ${final_value:.2f}")
+        except ValueError:
+            print("Invalid input. Please enter valid numbers.")
+        time.sleep(3)
+
+    elif choice == '4':
+        data_input = input("Enter the data as a comma-separated list (e.g., 1, 2, 3, 4, 5): ")
+        try:
+            data = [int(x.strip()) for x in data_input.split(',')]
+            window_size = int(input("Enter the window size (e.g., 3): "))
+            moving_avg = [sum(data[i:i + window_size]) / window_size for i in range(len(data) - window_size + 1)]
+
+            plt.plot(data, label="Original Data", color='blue', marker='o')
+            plt.plot(range(window_size - 1, len(data)), moving_avg, label=f'Moving Average (Window Size={window_size})', color='red', linestyle='--', marker='x')
+            plt.title('Moving Average')
+            plt.xlabel('Index')
+            plt.ylabel('Value')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+        except ValueError:
+            print("Invalid input. Make sure to enter only numbers.")
+        time.sleep(3)
+
+    elif choice == '5':
+        try:
+            loan_amount = float(input("Enter the loan amount: $"))
+            annual_interest_rate = float(input("Enter the annual interest rate (in %): "))
+            years = int(input("Enter the loan term (in years): "))
+            monthly_payment = calculate_monthly_payment(loan_amount, annual_interest_rate, years)
+            print(f"\nYour monthly mortgage payment is: ${monthly_payment:.2f}")
+        except ValueError:
+            print("Invalid input. Please enter valid numbers.")
+        time.sleep(3)
+
+    elif choice == '6':
+        print("Exiting...")
+        time.sleep(1.5)
+        print('Complete')
+        break
+
+    else:
+        print("Invalid choice.")
+        time.sleep(2)
